@@ -54,6 +54,7 @@ class MetricTest(unittest.TestCase):
                 self.assertEqual(float(f'%.{_ - 1}e' % param), float(num))
             driver.find_element_by_name("argumentConv").clear()
 
+
     def test_celsius_to_fahrenheit_with_decimal(self):
         driver = self.driver
         driver.get("https://www.metric-conversions.org/temperature/celsius-to-fahrenheit.htm")
