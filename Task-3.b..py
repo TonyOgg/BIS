@@ -8,7 +8,6 @@ lst = input('Enter your text: ').split(' ')
 
 em1 = []
 em2 = set()
-em3 = Counter(lst)
 
 def first_repeat_1(a):
     for i in lst:
@@ -30,17 +29,6 @@ def first_repeat_2(a):
     tm = time.time()-start
     print('Lead time 2: ' + str(tm) + ' sec')
 
-# def first_repeat_2(a):
-# start = time.time()
-# for i in em3:
-#     if em3[i] > 1:
-#         print(i)
-#         break
-# tm = time.time()-start
-# if len(em3) == len(lst):
-#     print('No repeating words')
-# print('Lead time 3: ' + str(tm) + ' sec')
-
 start = time.time()
 first_repeat_1(lst)
 if len(em1) == len(lst):
@@ -50,3 +38,5 @@ start = time.time()
 first_repeat_2(lst)
 if len(em2) == len(lst):
     print('No repeating words')
+
+

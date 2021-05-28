@@ -169,3 +169,4 @@ def test_delete_no_existed_user():
     response = requests.delete(url_2)
     assert response.status_code == 404
     print('User ' + mysecondUser["username"] + ' is not defined')
+

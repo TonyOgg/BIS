@@ -8,9 +8,8 @@ import unittest
 from time import sleep
 from selenium import webdriver
 
-
 class MetricTest(unittest.TestCase):
-    testing_numbers = [3.435e-6, -100000, -7.64, 0, 0.000001, 4.55, 1000, 3e+5]
+    testing_numbers = [3.435e-6, -10000, -7.64, 0, 0.000001, 4.51, 1000, 3e+5]
 
     def setUp(self):
         self.driver = webdriver.Chrome()
@@ -54,147 +53,76 @@ class MetricTest(unittest.TestCase):
                 self.assertEqual(float(f'%.{_ - 1}e' % param), float(num))
             driver.find_element_by_name("argumentConv").clear()
 
+    def going_accuracy_for_fractions(self, option, splitter, func):
+
+        driver = self.driver
+        self.option = option
+        self.splitter = splitter
+        self.func = func
+
+        for i in MetricTest.testing_numbers:
+            driver.find_element_by_name("argumentConv").send_keys(f"{i}")
+            format = self.select_format_of_conversion()[self.option].click()
+            accuracy = self.select_accuracy_of_conversion()
+            for _ in range(1, len(accuracy)):
+                accuracy[_].click()
+                name = driver.find_element_by_id("answer").text.split(' ')
+                try:
+                    sup = driver.find_element_by_xpath('//*[@id="answer"]/sup').text
+                except:
+                    sup = ''
+                try:
+                    sub = driver.find_element_by_xpath('//*[@id="answer"]/sub').text
+                except:
+                    sub = ''
+                if sup == sub:
+                    num = name[1].split(self.splitter)[0]
+                else:
+                    num = name[1].split(self.splitter)[0].split(sup + '⁄')[0]
+                param = self.func(i)
+                first_part = str(round(param, 3)).split('.')[0]
+                self.assertAlmostEqual(int(first_part), int(num), delta=1)
+                if sup != '':
+                    self.assertAlmostEqual((round(int(sup) / int(sub), 3)), round(param - float(first_part), 3),
+                                           delta=0.9)
+            driver.find_element_by_name("argumentConv").clear()
 
     def test_celsius_to_fahrenheit_with_decimal(self):
         driver = self.driver
         driver.get("https://www.metric-conversions.org/temperature/celsius-to-fahrenheit.htm")
         sleep(3)
-        self.going_accuracy_for_decimal(0, '°', self.converting_celsius_to_fahrenheit())
+        self.going_accuracy_for_decimal(0, '°', self.converting_celsius_to_fahrenheit)
 
-    #     for i in MetricTest.testing_numbers:
-    #         driver.find_element_by_name("argumentConv").send_keys(f"{i}")
-    #         format = self.select_format_of_conversion()[0].click()
-    #         accuracy = self.select_accuracy_of_conversion()
-    #         for _ in range(1, len(accuracy)):
-    #             accuracy[_].click()
-    #             name = driver.find_element_by_id("answer").text.split(' ')
-    #             num = name[1].split('°')[0]
-    #             param = self.converting_celsius_to_fahrenheit(i)
-    #             self.assertEqual(float(f'%.{_ - 1}e' % param), float(num))
-    #         driver.find_element_by_name("argumentConv").clear()
-    # #
-    # def test_celsius_to_fahrenheit_with_fractions(self):
-    #     driver = self.driver
-    #     driver.get("https://www.metric-conversions.org/temperature/celsius-to-fahrenheit.htm")
-    #     sleep(3)
-    #     for i in MetricTest.testing_numbers:
-    #         driver.find_element_by_name("argumentConv").send_keys(f"{i}")
-    #         format = self.select_format_of_conversion()[1].click()
-    #         accuracy = self.select_accuracy_of_conversion()
-    #         for _ in range(1, len(accuracy)):
-    #             accuracy[_].click()
-    #             name = driver.find_element_by_id("answer").text.split(' ')
-    #             try:
-    #                 sup = driver.find_element_by_xpath('//*[@id="answer"]/sup').text
-    #             except:
-    #                 sup = ''
-    #             try:
-    #                 sub = driver.find_element_by_xpath('//*[@id="answer"]/sub').text
-    #             except:
-    #                 sub = ''
-    #             if sup == sub:
-    #                 num = name[1].split('°')[0]
-    #             else:
-    #                 num = name[1].split('°')[0].split(sup + '⁄')[0]
-    #             fahrenheit = self.converting_celsius_to_fahrenheit(i)
-    #             first_part = str(round(fahrenheit, 1)).split('.')[0]
-    #             self.assertEqual(first_part, num)
-    #             if sup != '':
-    #                 self.assertEqual(round(int(sup) / int(sub), 1), round(fahrenheit - float(first_part), 1))
-    #         driver.find_element_by_name("argumentConv").clear()
-    #
-    #
-    # def test_meters_to_feet_with_decimal(self):
-    #     driver = self.driver
-    #     driver.get("https://www.metric-conversions.org/length/meters-to-feet.htm")
-    #     sleep(3)
-    #     for i in MetricTest.testing_numbers:
-    #         driver.find_element_by_name("argumentConv").send_keys(f"{i}")
-    #         format = self.select_format_of_conversion()[1].click()
-    #         accuracy = self.select_accuracy_of_conversion()
-    #         for _ in range(1, len(accuracy)):
-    #             accuracy[_].click()
-    #             name = driver.find_element_by_id("answer").text.split(' ')
-    #             num = name[1].split('f')[0]
-    #             feet = self.converting_meters_to_feet(i)
-    #             self.assertEqual(float(f'%.{_ - 1}e' % feet), float(num))
-    #         driver.find_element_by_name("argumentConv").clear()
-    #
-    # def test_meters_to_feet_with_fractions(self):
-    #     driver = self.driver
-    #     driver.get("https://www.metric-conversions.org/length/meters-to-feet.htm")
-    #     sleep(3)
-    #     for i in MetricTest.testing_numbers:
-    #         driver.find_element_by_name("argumentConv").send_keys(f"{i}")
-    #         format = self.select_format_of_conversion()[-1].click()
-    #         accuracy = self.select_accuracy_of_conversion()
-    #         for _ in range(1, len(accuracy)):
-    #             accuracy[_].click()
-    #             name = driver.find_element_by_id("answer").text.split(' ')
-    #             try:
-    #                 sup = driver.find_element_by_xpath('//*[@id="answer"]/sup').text
-    #             except:
-    #                 sup = ''
-    #             try:
-    #                 sub = driver.find_element_by_xpath('//*[@id="answer"]/sub').text
-    #             except:
-    #                 sub = ''
-    #             if sup == sub:
-    #                 num = name[1].split('f')[0]
-    #             else:
-    #                 num = name[1].split('f')[0].split(sup + '⁄')[0]
-    #             meters = self.converting_meters_to_feet(i)
-    #             first_part = str(round(meters, 1)).split('.')[0]
-    #             self.assertEqual(first_part, num)
-    #             if sup != '':
-    #                 self.assertEqual(round(int(sup)/int(sub), 1), round(meters - float(first_part), 1))
-    #         driver.find_element_by_name("argumentConv").clear()
-    #
-    # def test_ounces_to_grams_with_decimal(self):
-    #     driver = self.driver
-    #     driver.get("https://www.metric-conversions.org/weight/ounces-to-grams.htm")
-    #     sleep(3)
-    #     for i in MetricTest.testing_numbers:
-    #         driver.find_element_by_name("argumentConv").send_keys(f"{i}")
-    #         format = self.select_format_of_conversion()[0].click()
-    #         accuracy = self.select_accuracy_of_conversion()
-    #         for _ in range(1, len(accuracy)):
-    #             accuracy[_].click()
-    #             name = driver.find_element_by_id("answer").text.split(' ')
-    #             num = name[1].split('g')[0]
-    #             gram = self.converting_ounces_to_grams(i)
-    #             self.assertEqual(float(f'%.{_ - 1}e' % gram), float(num))
-    #         driver.find_element_by_name("argumentConv").clear()
+    def test_meters_to_feet_with_decimal(self):
+        driver = self.driver
+        driver.get("https://www.metric-conversions.org/length/meters-to-feet.htm")
+        sleep(3)
+        self.going_accuracy_for_decimal(1, 'f', self.converting_meters_to_feet)
 
-    # def test_ounces_to_grams_with_fractions(self):
-    #     driver = self.driver
-    #     driver.get("https://www.metric-conversions.org/weight/ounces-to-grams.htm")
-    #     sleep(3)
-    #     for i in MetricTest.testing_numbers:
-    #         driver.find_element_by_name("argumentConv").send_keys(f"{i}")
-    #         format = self.select_format_of_conversion()[-1].click()
-    #         accuracy = self.select_accuracy_of_conversion()
-    #         for _ in range(1, len(accuracy)):
-    #             accuracy[_].click()
-    #             name = driver.find_element_by_id("answer").text.split(' ')
-    #             try:
-    #                 sup = driver.find_element_by_xpath('//*[@id="answer"]/sup').text
-    #             except:
-    #                 sup = ''
-    #             try:
-    #                 sub = driver.find_element_by_xpath('//*[@id="answer"]/sub').text
-    #             except:
-    #                 sub = ''
-    #             if sup == sub:
-    #                 num = name[1].split('g')[0]
-    #             else:
-    #                 num = name[1].split('g')[0].split(sup + '⁄')[0]
-    #             grams = self.converting_ounces_to_grams(i)
-    #             first_part = str(round(grams, 2)).split('.')[0]
-    #             self.assertEqual(first_part, num)
-    #             if sup != '':
-    #                 self.assertEqual(round(int(sup)/int(sub), 1), round(grams - float(first_part), 1))
-    #         driver.find_element_by_name("argumentConv").clear()
+    def test_ounces_to_grams_with_decimal(self):
+        driver = self.driver
+        driver.get("https://www.metric-conversions.org/weight/ounces-to-grams.htm")
+        sleep(3)
+        self.going_accuracy_for_decimal(0, 'g', self.converting_ounces_to_grams)
+
+    def test_celsius_to_fahrenheit_with_fractions(self):
+        driver = self.driver
+        driver.get("https://www.metric-conversions.org/temperature/celsius-to-fahrenheit.htm")
+        sleep(3)
+        self.going_accuracy_for_fractions(1, '°', self.converting_celsius_to_fahrenheit)
+
+    def test_meters_to_feet_with_fractions(self):
+        driver = self.driver
+        driver.get("https://www.metric-conversions.org/length/meters-to-feet.htm")
+        sleep(3)
+        self.going_accuracy_for_fractions(-1, 'f', self.converting_meters_to_feet)
+
+    def test_ounces_to_grams_with_fractions(self):
+        driver = self.driver
+        driver.get("https://www.metric-conversions.org/weight/ounces-to-grams.htm")
+        sleep(3)
+        self.going_accuracy_for_fractions(-1, 'g', self.converting_ounces_to_grams)
+
 
     def tearDown(self):
         self.driver.close()
@@ -202,3 +130,7 @@ class MetricTest(unittest.TestCase):
 
 if __name__ == "__main__":
     unittest.main()
+
+
+# There is mistake in convert ounces to grams https://www.metric-conversions.org/weight/ounces-to-grams.htm
+# numbers less than 1e-8.
